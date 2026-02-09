@@ -51,9 +51,18 @@
 		Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
 
 		<h2>Task 1: Drawing Single-Color Triangles</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		I first compute the bounding box that wraps the triangle from the minimum and maximum vertex coordinates and clamp it. I then iterate over each pixel inside this box and sample at the pixel center (x+0.5, y+0.5).
 
-		<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
+To determine if the sample is inside the triangle, I use the point in triangle test and formulas from class to evaluate 3 edges. A point is inside if all three edge values have the same sign. This handles both clockwise and counter-clockwise triangles and includes boundary pixels. If the point is inside, I call fill_pixel(x, y, color).
+
+The algorithm only checks pixels within the triangle's bounding box and there's only 3 edge tests per pixel, so its runtime is proportional to the bounding box area, which matches the efficiency noted in the specification.
+
+		<figure>
+			<img src="screenshot_2-6_17-16-38.png" alt="Task 1 Screenshot" style="width:50%"/>
+			<figcaption>Task 1 Screenshot</figcaption>
+		</figure>
+
+		<!-- <p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
 			  <tr>
@@ -77,7 +86,7 @@
 				</td>
 			  </tr>
 			</table>
-		</div>
+		</div> -->
 		
 		<h2>Task 2: Antialiasing by Supersampling</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
