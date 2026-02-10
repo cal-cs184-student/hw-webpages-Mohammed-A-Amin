@@ -89,7 +89,24 @@ The algorithm only checks pixels within the triangle's bounding box and there's 
 		</div> -->
 		
 		<h2>Task 2: Antialiasing by Supersampling</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		I treated each output pixel as a grid of \(\sqrt{\text{sample\_rate}} \times \sqrt{\text{sample\_rate}}\) subpixel samples stored in <code>sample_buffer</code>. I updated buffer management so the sample buffer always resizes correctly with framebuffer size and sampling rate changes, and I modified triangle rasterization to test coverage at each subpixel center rather than only at the pixel center. Covered subpixels are written into the sample buffer, while points and lines are handled by filling all subsamples of a pixel with the same color so they still render correctly. At the end of rendering, I resolve samples by averaging each pixel’s subsample colors and writing the result to the 8-bit RGB framebuffer. Supersampling is useful because edge pixels can represent partial triangle coverage instead of a binary inside/outside result, which reduces jagged edges; this is why sample rates 1, 4, and 16 show progressively smoother boundaries, especially around thin corners and steep edges.
+		<div style="display: flex; justify-content: center; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
+			<figure style="margin: 0; text-align: center;">
+			  <img src="screenshot_2-9_17-20-47.png" alt="Task 2 sample rate 1" style="width: 320px;" />
+			  <figcaption>Sample rate = 1</figcaption>
+			</figure>
+		  
+			<figure style="margin: 0; text-align: center;">
+			  <img src="screenshot_2-9_17-20-50.png" alt="Task 2 sample rate 4" style="width: 320px;" />
+			  <figcaption>Sample rate = 4</figcaption>
+			</figure>
+		  
+			<figure style="margin: 0; text-align: center;">
+			  <img src="screenshot_2-9_17-20-53.png" alt="Task 2 sample rate 16" style="width: 320px;" />
+			  <figcaption>Sample rate = 16</figcaption>
+			</figure>
+		  </div>
+		  
 
 		<h2>Task 3: Transforms</h2>
 		I modified the robot mannequin to make both arms wave by rotating the last segment of each arm 90 degrees and applying a small translation to align them properly.
