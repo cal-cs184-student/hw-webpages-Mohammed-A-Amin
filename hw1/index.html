@@ -120,7 +120,54 @@ The algorithm only checks pixels within the triangle's bounding box and there's 
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 		<h2>Task 5: "Pixel sampling" for texture mapping</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		Pixel sampling is the process of deciding what texture color to use when a rasterized sample lands at a continuous UV coordinate 
+		that usually does not align exactly with a texel center. In my implementation, I first compute barycentric coordinates for each 
+		covered sample point in rasterize_textured_triangle, use them to interpolate the sample’s UV, and then sample the texture at mip level 0. For the two sampling methods,
+		nearest sampling maps UV to texel space, picks the closest texel index, and 
+		returns that single texel color, which is fast but can look blocky and aliased. Bilinear sampling retrieves the four texels around the UV location 
+		and interpolates them using the slide’s lerp steps (horizontal lerps with alpha, then vertical lerp with beta), producing smoother results with 
+		slightly higher cost.
+
+
+		<div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-top: 16px;">
+			<figure style="margin: 0; text-align: center; width: 360px;">
+			  <img src="screenshot_2-12_20-37-8.png" alt="Nearest sampling, 1 sample per pixel" style="width: 100%;" />
+			  Nearest, 1 sample/pixel
+			</figure>
+		  
+			<figure style="margin: 0; text-align: center; width: 360px;">
+			  <img src="screenshot_2-12_20-37-27.png" alt="Nearest sampling, 16 samples per pixel" style="width: 100%;" />
+			  Nearest, 16 samples/pixel
+			</figure>
+		  
+			<figure style="margin: 0; text-align: center; width: 360px;">
+			  <img src="screenshot_2-12_20-37-44.png" alt="Bilinear sampling, 1 sample per pixel" style="width: 100%;" />
+			  Bilinear, 1 sample/pixel
+			</figure>
+		  
+			<figure style="margin: 0; text-align: center; width: 360px;">
+			  <img src="screenshot_2-12_20-37-59.png" alt="Bilinear sampling, 16 samples per pixel" style="width: 100%;" />
+			  Bilinear, 16 samples/pixel
+			</figure>
+		  </div>
+		  
+
+
+		  <br>
+		I used test2.svg and compared the same area with the pixel inspector for all four settings. 
+		In nearest + 1 sample, the zoom box looks very blocky and each texel edge is obvious. 
+		In nearest + 16 samples, the triangle edges look a little cleaner, but the texture itself is still blocky. 
+		In bilinear + 1 sample, the texture already looks smoother because nearby texels are blended instead of picking 
+		just one texel. In bilinear + 16 samples, it looks the best overall becuase it has smooth texture colors and cleaner shape edges.
+
+		The biggest difference between nearest and bilinear shows up in places with lots of tiny color changes 
+		(like coastlines and grid lines in this map). Nearest jumps from one texel color to another, so it looks
+		 harsh and pixelated. Bilinear mixes nearby texels, so the color changes are more gradual and the image looks more natural.
+
+
+
+
+
 
 		<h2>Task 6: "Level Sampling" with mipmaps for texture mapping</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
