@@ -28,7 +28,7 @@
 	<body>
 		<div class="container">
 		<h1>CS184/284A Spring 2025 Homework 1 Write-Up</h1>
-		<div style="text-align: center;">Names: </div>
+		<div style="text-align: center;">Names: Mohammed Amin, Sean Tai </div>
 
 		<br>
 
@@ -117,7 +117,19 @@ The algorithm only checks pixels within the triangle's bounding box and there's 
 		</figure>
 
 		<h2>Task 4: Barycentric coordinates</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		Barycentric coordinates express any point inside a triangle as a weighted combination of the three vertices: \( V = \alpha V_A + \beta V_B + \gamma V_C \), where \( \alpha + \beta + \gamma = 1 \). Each weight tells you how close the point is to the corresponding vertex. When we assign a different color to each vertex (e.g. red, green, blue), the barycentric weights smoothly blend those colors across the triangle's interior, as shown below. They can be used to represent color, texture coords, etc.
+
+		<figure>
+			<img src="Screenshot%202026-02-12%20at%209.04.18%E2%80%AFPM.png" alt="Barycentric coordinate triangle" style="width:50%"/>
+			<figcaption>A triangle with red, green, and blue vertices blended via barycentric interpolation</figcaption>
+		</figure>
+
+		Below is a screenshot of svg/basic/test7.svg rendered with default viewing parameters and sample rate 1. The color wheel is composed of many small triangles, each with vertex colors interpolated using barycentric coordinates, producing the smooth gradient.
+
+		<figure>
+			<img src="screenshot_2-9_18-45-12.png" alt="test7.svg color wheel" style="width:50%"/>
+			<figcaption>test7.svg — color wheel rendered at sample rate 1</figcaption>
+		</figure>
 
 		<h2>Task 5: "Pixel sampling" for texture mapping</h2>
 		Pixel sampling is the process of deciding what texture color to use when a rasterized sample lands at a continuous UV coordinate 
@@ -129,27 +141,30 @@ The algorithm only checks pixels within the triangle's bounding box and there's 
 		slightly higher cost.
 
 
-		<div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-top: 16px;">
-			<figure style="margin: 0; text-align: center; width: 360px;">
-			  <img src="screenshot_2-12_20-37-8.png" alt="Nearest sampling, 1 sample per pixel" style="width: 100%;" />
-			  Nearest, 1 sample/pixel
-			</figure>
-		  
-			<figure style="margin: 0; text-align: center; width: 360px;">
-			  <img src="screenshot_2-12_20-37-27.png" alt="Nearest sampling, 16 samples per pixel" style="width: 100%;" />
-			  Nearest, 16 samples/pixel
-			</figure>
-		  
-			<figure style="margin: 0; text-align: center; width: 360px;">
-			  <img src="screenshot_2-12_20-37-44.png" alt="Bilinear sampling, 1 sample per pixel" style="width: 100%;" />
-			  Bilinear, 1 sample/pixel
-			</figure>
-		  
-			<figure style="margin: 0; text-align: center; width: 360px;">
-			  <img src="screenshot_2-12_20-37-59.png" alt="Bilinear sampling, 16 samples per pixel" style="width: 100%;" />
-			  Bilinear, 16 samples/pixel
-			</figure>
-		  </div>
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="screenshot_2-12_20-37-8.png" width="400px"/>
+				  <figcaption>Nearest, 1 sample/pixel</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="screenshot_2-12_20-37-27.png" width="400px"/>
+				  <figcaption>Nearest, 16 samples/pixel</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="screenshot_2-12_20-37-44.png" width="400px"/>
+				  <figcaption>Bilinear, 1 sample/pixel</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="screenshot_2-12_20-37-59.png" width="400px"/>
+				  <figcaption>Bilinear, 16 samples/pixel</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
 		  
 
 
