@@ -37,10 +37,15 @@
 		<br>
 
 		Link to GitHub repository: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
-
 		<!--
 		We've already added one heading per task, to make your write-up as navigable when grading. Please fit your write-up within these sections!
 		-->
+
+		<h2>Overview</h2>
+		We implemented a full software rasterization pipeline from basic triangle drawing to texture filtering with mipmaps. We started with single-color triangle rasterization, then added supersampling using a sample buffer and resolve step to reduce jagged edges, implemented transforms for scene edits, used barycentric interpolation for smooth color blending, and extended that to texture mapping with interpolated UVs. We also implemented nearest and bilinear sampling methods when drawing the textured rectangle, then added level sampling with mipmaps (<code>L_ZERO</code>, <code>L_NEAREST</code>, and linear level blending) using UV derivatives.
+		
+		This homework was definitely challenging at first, especially getting images to load correctly and getting comfortable with the C++ vector/math libraries. But step by step, we got much more comfortable with the workflow and the codebase. We also remember in Homework 0 we could not really tell the difference between the sampling methods when drawing the textured rectangle, and we did not clearly understand mipmaps when asked about them there. After implementing each method directly from the lecture slides in this homework, the differences are much clearer to us now, both visually and algorithmically.
+		
 
 		<h2>Task 1: Drawing Single-Color Triangles</h2>
 		We first compute the bounding box that wraps the triangle from the minimum and maximum vertex coordinates and clamp it. We then iterate over each pixel inside this box and sample at the pixel center (x+0.5, y+0.5).
@@ -213,7 +218,6 @@ The algorithm only checks pixels within the triangle's bounding box and there's 
 <br>
 
 In this view showing one of the floating coins, the nearest-level outputs match the level-zero outputs where <code>L_ZERO + P_NEAREST</code> and <code>L_NEAREST + P_NEAREST</code> look the same, and <code>L_ZERO + P_LINEAR</code> and <code>L_NEAREST + P_LINEAR</code> look the same. Nearest looks more blocky in the inspector, while bilinear gives smoother color transitions.
-
 
 	</body>
 </html>
