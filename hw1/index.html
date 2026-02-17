@@ -85,7 +85,7 @@ The algorithm only checks pixels within the triangle's bounding box and there's 
 		</div> -->
 		
 		<h2>Task 2: Antialiasing by Supersampling</h2>
-		We treated each output pixel as a grid of \(\sqrt{\text{sample\_rate}} \times \sqrt{\text{sample\_rate}}\) subpixel samples stored in <code>sample_buffer</code>. We updated buffer management so the sample buffer always resizes correctly with framebuffer size and sampling rate changes, and we modified triangle rasterization to test coverage at each subpixel center rather than only at the pixel center. Covered subpixels are written into the sample buffer, while points and lines are handled by filling all subsamples of a pixel with the same color so they still render correctly. At the end of rendering, we resolve samples by averaging each pixel’s subsample colors and writing the result to the 8-bit RGB framebuffer. Supersampling is useful because edge pixels can represent partial triangle coverage instead of a binary inside/outside result, which reduces jagged edge. You can this in action where the sample rates 1, 4, and 16 show progressively smoother boundaries, especially around thin corners and steep edges.
+		We treated each output pixel as a grid of \(\sqrt{\text{sample\_rate}} \times \sqrt{\text{sample\_rate}}\) subpixel samples stored in <code>sample_buffer</code>. We updated buffer management so the sample buffer always resizes correctly with framebuffer size and sampling rate changes, and we modified triangle rasterization to test coverage at each subpixel center rather than only at the pixel center. Covered subpixels are written into the sample buffer, while points and lines are handled by filling all subsamples of a pixel with the same color so they still render correctly. At the end of rendering, we resolve samples by averaging each pixel’s subsample colors and writing the result to the 8-bit RGB framebuffer. Supersampling is useful because edge pixels can represent partial triangle coverage instead of a binary inside/outside result, which reduces jagged edge. You can see this in action where the sample rates 1, 4, and 16 show progressively smoother boundaries, especially around thin corners and steep edges.
 		<div style="display: flex; justify-content: center; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
 			<figure style="margin: 0; text-align: center;">
 			  <img src="screenshot_2-9_17-20-47.png" alt="Task 2 sample rate 1" style="width: 320px;" />
@@ -187,7 +187,7 @@ The algorithm only checks pixels within the triangle's bounding box and there's 
 		 <br><br>
 
 
-		 I chose to use a level from Super Mario Bros mapped on a flat quad and captured the four required combinations below.
+		 We chose to use a image which is a level from Super Mario Bros mapped on a flat quad and captured the four required combinations below.
 
 <div style="display: flex; flex-direction: column; align-items: center;">
   <table style="width: 100%; text-align: center; border-collapse: collapse;">
