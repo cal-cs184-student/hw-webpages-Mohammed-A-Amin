@@ -38,17 +38,9 @@
 
 		Link to GitHub repository: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
 
-		<figure>
-			<img src="lion.jpg" alt="Lion" style="width:50%"/>
-			<figcaption>You can add images with captions!</figcaption>
-		</figure>
-
 		<!--
 		We've already added one heading per task, to make your write-up as navigable when grading. Please fit your write-up within these sections!
 		-->
-
-		<h2>Overview</h2>
-		Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
 
 		<h2>Task 1: Drawing Single-Color Triangles</h2>
 		We first compute the bounding box that wraps the triangle from the minimum and maximum vertex coordinates and clamp it. We then iterate over each pixel inside this box and sample at the pixel center (x+0.5, y+0.5).
@@ -189,21 +181,39 @@ The algorithm only checks pixels within the triangle's bounding box and there's 
 		 <br><br>
 		 <b>Tradeoffs:</b> Pixel sampling is the cheapest, it requires no extra memory and only a small speed cost for bilinear, but its antialiasing power is limited to smoothing texel boundaries. Increasing the number of samples per pixel (supersampling) gives strong antialiasing, but multiplies memory and computation proportional with the sample rate. Level sampling (mipmaps) is a good in between, the precomputed mipmap chain costs only a bit more memory (around 1/3 as shown in discussion), adds minimal per-pixel overhead to select a level, and effectively reduces aliasing in minified regions where many texels map to one pixel.
 		 <br><br>
-		 
 
-		<h2>(Optional) Task 7: Extra Credit - Draw Something Creative!</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
-		<h2>Additional Notes (please remove)</h2>
-		<ul>
-			<li>You can also add code if you'd like as so: <code>code code code</code></li>
-			<li>If you'd like to add math equations, 
-				<ul>
-					<li>You can write inline equations like so: \( a^2 + b^2 = c^2 \)</li>
-					<li>You can write display equations like so: \[ a^2 + b^2 = c^2 \]</li>
-				</ul>
-			</li>
-		</ul>
-		</div>
+		 I chose to use a level from Super Mario Bros mapped on a flat quad and captured the four required combinations below.
+
+<div style="display: flex; flex-direction: column; align-items: center;">
+  <table style="width: 100%; text-align: center; border-collapse: collapse;">
+    <tr>
+      <td style="text-align: center;">
+        <img src="screenshot_2-16_22-29-56.png" width="400px"/>
+        <figcaption>L_ZERO + P_NEAREST</figcaption>
+      </td>
+      <td style="text-align: center;">
+        <img src="screenshot_2-16_22-30-3.png" width="400px"/>
+        <figcaption>L_ZERO + P_LINEAR</figcaption>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">
+        <img src="screenshot_2-16_22-30-19.png" width="400px"/>
+        <figcaption>L_NEAREST + P_NEAREST</figcaption>
+      </td>
+      <td style="text-align: center;">
+        <img src="screenshot_2-16_22-30-26.png" width="400px"/>
+        <figcaption>L_NEAREST + P_LINEAR</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<br>
+
+In this view showing one of the floating coins, the nearest-level outputs match the level-zero outputs where <code>L_ZERO + P_NEAREST</code> and <code>L_NEAREST + P_NEAREST</code> look the same, and <code>L_ZERO + P_LINEAR</code> and <code>L_NEAREST + P_LINEAR</code> look the same. Nearest looks more blocky in the inspector, while bilinear gives smoother color transitions.
+
+
 	</body>
 </html>
