@@ -28,20 +28,16 @@
 	<body>
 		<div class="container">
 		<h1>CS184/284A Spring 2025 Homework 2 Write-Up</h1>
-		<div style="text-align: center;">Names: </div>
+		<div style="text-align: center;">Names: Mohammed Amin, Sean Tai </div>
 
 		<br>
 
-		Link to webpage: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
+		Link to webpage: <a href="https://cal-cs184-student.github.io/hw-webpages-Mohammed-A-Amin/hw2/index.html">https://cal-cs184-student.github.io/hw-webpages-Mohammed-A-Amin/hw1/index.html</a>
 
 		<br>
 		
-		Link to GitHub repository: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
+		Link to GitHub repository: <a href="https://github.com/cal-cs184-student/hw2-meshedit-seanmo">https://github.com/cal-cs184-student/hw2-meshedit-seanmo</a>
 
-		<figure>
-			<img src="teapot.png" alt="Teapot" style="width:50%"/>
-			<figcaption>You can add images with captions!</figcaption>
-		</figure>
 
 		<!--
 		We've already added one heading per part, to make your write-up as navigable when grading. Please fit your write-up within these sections!
@@ -50,41 +46,98 @@
 		<h2>Overview</h2>
 		Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
 
-		<h2>Section I: Bezier Curves and Surfaces</h2>
-
 		<h3>Part 1: Bezier curves with 1D de Casteljau subdivision</h3>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
-		<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
+		<p>
+		De Casteljau’s algorithm evaluates a Bezier curve at a parameter <code>t</code> by repeatedly
+		linearly interpolating between adjacent control points. Starting from the original control points
+		<code>p0…pn</code>, one subdivision step produces a new list of points
+		<code>p'i = (1−t)·pi + t·p{i+1}</code>. Repeating this process reduces the list size by 1 each level
+		until only one point remain and that final point is the point on the Bezier curve at parameter <code>t</code>.
+		</p>
+
+		<p>
+		In my implementation, <code>BezierCurve::evaluateStep(points)</code> performs exactly one level of this
+		interpolation where it loops over each adjacent pair <code>(points[i], points[i+1])</code> and pushes
+		<code>(1−t)·points[i] + t·points[i+1]</code> into an output vector (size <code>n−1</code>). 
+		</p>
+
+		<p>
+		I created a custom Bezier curve with 6 control points:
+		</p>
+		<pre><code>6
+		0.100 0.200   0.200 0.750   0.400 0.300   0.600 0.900   0.800 0.250   0.950 0.650
+		</code></pre>
+
 		<div style="display: flex; flex-direction: column; align-items: center;">
-			<table style="width: 100%; text-align: center; border-collapse: collapse;">
-			  <tr>
-				<td style="text-align: center;">
-				  <img src="teapot.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-				<td style="text-align: center;">
-				  <img src="teapot.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-			  </tr>
-			  <tr>
-				<td style="text-align: center;">
-				  <img src="teapot.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-				<td style="text-align: center;">
-				  <img src="teapot.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-			  </tr>
-			</table>
+		<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			<tr>
+			<td style="text-align: center;">
+				<img src="bc1.png" width="400px"/>
+				<figcaption>Level 0: original 6 control points.</figcaption>
+			</td>
+			<td style="text-align: center;">
+				<img src="bc2.png" width="400px"/>
+				<figcaption>Level 1: 5 interpolated points (one de Casteljau step).</figcaption>
+			</td>
+			</tr>
+			<tr>
+			<td style="text-align: center;">
+				<img src="bc3.png" width="400px"/>
+				<figcaption>Level 2: 4 interpolated points.</figcaption>
+			</td>
+			<td style="text-align: center;">
+				<img src="bc4.png" width="400px"/>
+				<figcaption>Level 3: 3 interpolated points.</figcaption>
+			</td>
+			</tr>
+			<tr>
+			<td style="text-align: center;">
+				<img src="bc5.png" width="400px"/>
+				<figcaption>Level 4: 2 interpolated points.</figcaption>
+			</td>
+			<td style="text-align: center;">
+				<img src="bc6.png" width="400px"/>
+				<figcaption>Level 5: final evaluated point on the curve.</figcaption>
+			</td>
+			</tr>
+		</table>
+
+		<div style="margin-top: 20px; text-align: center;">
+			<img src="bc7.png" width="500px"/>
+			<figcaption>Slightly modified curve after moving control points and changing <code>t</code> (scroll).</figcaption>
+		</div>
 		</div>
 
 		<h3>Part 2: Bezier surfaces with separable 1D de Casteljau</h3>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		<p>
+			De Casteljau’s algorithm extends to Bezier surfaces by treating the Bezier surface as two
+			nested 1D Bezier evaluations (the surface is separable in <code>u</code> and <code>v</code>). Given a
+			2D grid of control points <code>P(i,j)</code>, we first run 1D de Casteljau along one parameter direction
+			to collapse the grid into a single set of intermediate control points, then run 1D de Casteljau again
+			along the other parameter to obtain the final point on the surface at <code>(u,v)</code>. (Evaluating
+			<code>u</code> first then <code>v</code>, or <code>v</code> first then <code>u</code>, produces the same
+			surface point.)
+		  </p>
+		  
+		  <p>
+			In my implementation, <code>BezierPatch::evaluateStep(points, t)</code> performs one de Casteljau step in
+			3D by linearly interpolating adjacent points:
+			<code>p'i = (1−t)·pi + t·p{i+1}</code>. Then <code>BezierPatch::evaluate1D(points, t)</code> repeatedly calls
+			<code>evaluateStep</code> until only one point remains.
+		  </p>
+		  
+		  <p>
+			To evaluate the full surface, <code>BezierPatch::evaluate(u, v)</code> applies this 1D routine twice:
+			it evaluates  <code>u</code> on each of the 4 Bezier curves in that direction to
+			produce 4 intermediate points, then evaluates <code>v</code>
+			on those 4 points to return the final surface point.
+		  </p>
 
-		<h2>Section II: Triangle Meshes and Half-Edge Data Structure</h2>
+		  <div style="margin-top: 20px; text-align: center;">
+			<img src="teapt.png" width="500px"/>
+			<figcaption>The Teapot</figcaption>
+		</div>
 
 		<h3>Part 3: Area-weighted vertex normals</h3>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
