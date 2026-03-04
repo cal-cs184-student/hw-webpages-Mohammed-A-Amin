@@ -148,25 +148,25 @@
 		<h3>Part 5: Edge split</h3>
 		<p>
 			We implemented <code>splitEdge</code> by treating the operation as a local rewrite of the two triangles
-			incident to the selected interior edge. First, I return immediately for boundary edges. Then I collect the
-			local one-ring elements (the 6 original halfedges around the two triangles, their 4 outside twins, 4 old
-			vertices, 5 old edges, and 2 old faces). After that, I create the new elements needed for a split:
+			incident to the selected interior edge. First, we return immediately for boundary edges. Then we collect the
+			the 6 original halfedges around the two triangles, their 4 outside twins, 4 old
+			vertices, 5 old edges, and 2 old faces. After that, we create the new elements needed for a split:
 			1 midpoint vertex, 3 new edges, 2 new faces, and 6 new halfedges.
 		</p>
 		<p>
 			The midpoint vertex position is set to the average of the two endpoints of the split edge:
-			<code>m = 0.5 * (v0 + v1)</code>. I then reassign all local halfedge connectivity
+			<code>m = 0.5 * (v0 + v1)</code>. We then reassign all local halfedge connectivity
 			(<code>next</code>, <code>twin</code>, <code>vertex</code>, <code>edge</code>, and <code>face</code>)
 			so the old two triangles become four triangles around the new midpoint. This is all constant-time local work
 			and does not depend on total mesh size.
 		</p>
 		<p>
 			The main issue for me was assigning halfedges for every
-			<code>vertex</code>, <code>edge</code>, and <code>face</code> after rewiring. At first, I focused on
-			<code>setNeighbors(...)</code> and assumed everything was fine, but I still got weird behavior when repeatedly
+			<code>vertex</code>, <code>edge</code>, and <code>face</code> after rewiring. At first, We focused on
+			<code>setNeighbors(...)</code> and assumed everything was fine, but we still got weird behavior when repeatedly
 			splitting/flipping edges (occasional bad traversal and inconsistent selection in the viewer). The fix was to
 			explicitly set all representative pointers at the end, even when some of them could technically stay the same.
-			Once I did that consistently, the operation became stable under repeated edits. 
+			Once we did that consistently, the operation became stable under repeated edits. 
 		</p>
 		<div style="display: flex; flex-direction: column; align-items: center; gap: 28px;">
 
@@ -187,9 +187,72 @@
 		  
 		  </div>
 		  
-		<h3>Part 6: Loop subdivision for mesh upsampling</h3>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		  <h3>Part 6: Loop subdivision for mesh upsampling</h3>
 
+		 	<p>
+			We implemented Loop subdivision in three phases. First, we computed all updated positions on the original mesh:
+			old vertices store their Loop-updated values in <code>Vertex::newPosition</code>, and each old edge stores the
+			future midpoint value in <code>Edge::newPosition</code>. Second, we implemented 4-1 refinement by splitting each
+			original edge exactly once, then flipping only new edges that connect one old vertex and one new vertex.
+			Finally, we copied <code>newPosition</code> into <code>position</code> for all vertices.
+			</p>
+			
+			<p>
+				The most useful debugging trick was strict bookkeeping of connectivity metadata. In particular, subdivision was
+				unstable until edge <code>isNew</code> flags and representative halfedge pointers were assigned consistently after
+				split/flip operations. Repeated stress testing (running multiple Loop iterations in a row) was the easiest way to
+				catch pointer or flag mistakes.
+			</p>
+			
+			<p>
+				From our screenshots, repeated Loop subdivision makes the mesh progressively smoother while increasing triangle
+				density. Sharp corners and creases are gradually rounded because Loop is an approximating smoothing scheme. This
+				effect can be reduced by pre-splitting edges near important features so those regions get more local geometric
+				support before smoothing.
+			</p>
+
+			<p>
+				On <code>dae/cube.dae</code>, repeated subdivision without preprocessing produced slight asymmetry. This happens
+				because the initial cube triangulation has directional diagonal bias, so local neighborhoods are not perfectly
+				balanced under Loop updates. To reduce this, we pre-processed the cube using symmetric edge edits
+				(mirrored flips/splits across opposite faces) before subdivision. After preprocessing, the subdivided result is
+				more balanced and visibly more symmetric, though a little bias may remain.
+			</p>
+		
+		  <div style="display: flex; flex-direction: column; align-items: center; gap: 28px;">
+			  <figure>
+				  <img src="loop_original.png" width="700px" alt="Original mesh before Loop subdivision"/>
+				  <figcaption>Original mesh before Loop subdivision.</figcaption>
+			  </figure>
+		  
+			  <figure>
+				  <img src="loop_once.png" width="700px" alt="Mesh after one Loop subdivision"/>
+				  <figcaption>After 1 Loop iteration with increased triangle density and visible smoothing</figcaption>
+			  </figure>
+		  
+			  <figure>
+				  <img src="loop_twice.png" width="700px" alt="Mesh after two Loop subdivisions"/>
+				  <figcaption> After 2 Loop iterations  with stronger smoothing and more rounded features</figcaption>
+			  </figure>
+		  </div>
+		  
+		  <div style="display: flex; flex-direction: column; align-items: center; gap: 28px; margin-top: 28px;">
+			  <figure>
+				  <img src="cube_before.png" width="700px" alt="Cube before subdivision"/>
+				  <figcaption>Cube before subdivision</figcaption>
+			  </figure>
+		  
+			  <figure>
+				  <img src="cube_after_asym.png" width="700px" alt="Cube after repeated subdivision showing asymmetry"/>
+				  <figcaption>Cube after repeated Loop subdivision showing slight asymmetry</figcaption>
+			  </figure>
+		  
+			  <figure>
+				  <img src="cube_after_preprocessed.png" width="700px" alt="Cube after symmetric preprocessing and subdivision"/>
+				  <figcaption>Cube after symmetric pre-processing + Loop subdivision with improved symmetry</figcaption>
+			  </figure>
+		  </div>
+		  
 		<h2>(Optional) Section III: Potential Extra Credit - Art Competition: Model something Creative</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
