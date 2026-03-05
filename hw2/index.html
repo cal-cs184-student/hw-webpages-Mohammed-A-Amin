@@ -140,7 +140,22 @@
 		</div>
 
 		<h3>Part 3: Area-weighted vertex normals</h3>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		To implement area-weighted vertex normals, we used the half-edge traversal pattern from the half-edge primer, specifically the <code>printNeighborPositions</code> example which iterates around a vertex using <code>h = h->twin()->next()</code>. For each face, we retrieved the triangle's three vertex positions via <code>h->vertex()</code>, <code>h->next()->vertex()</code>, and <code>h->next()->next()->vertex()</code>. We then computed the cross product for each triangle and accumulated the results. The cross product, as noted in the spec, produces a vector whose direction is the face normal and whose magnitude equals twice the triangle area (\(\text{area} = \frac{1}{2} |u| \cdot |v| \cdot \sin\theta\), so \(|\text{cross}(u, v)| = 2 \cdot \text{area}\)). We then normalized the accumulated vector by dividing by its norm to get a unit normal.
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="Screenshot%202026-03-01%20at%203.34.23%E2%80%AFPM.png" width="400px"/>
+				  <figcaption>Flat shading (default)</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="Screenshot%202026-03-01%20at%203.34.36%E2%80%AFPM.png" width="400px"/>
+				  <figcaption>Phong shading (area-weighted vertex normals)</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
 
 		<h3>Part 4: Edge flip</h3>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
