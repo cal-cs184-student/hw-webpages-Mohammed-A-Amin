@@ -44,7 +44,7 @@
 		-->
 
 		<h2>Overview</h2>
-		Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
+		In this homework, we implemented geometry processing operations on triangle meshes using the half-edge data structure: Bezier curve/surface evaluation via de Casteljau's algorithm, area-weighted vertex normals for Phong shading, local remeshing operations (edge flip and edge split), and Loop subdivision for mesh upsampling. The most interesting takeaway was the half-edge data structure itself, and how it boils down to simple pointer traversals; once you understand the <code>twin()->next()</code> pattern, operations like iterating over a vertex's neighbors or rewiring an edge flip become mechanical (and tedious...). We also understand now how important keeping track of pointers are: a single wrong assignment among dozens of halfedge reassignments ruin everything.
 
 		<h3>Part 1: Bezier curves with 1D de Casteljau subdivision</h3>
 
