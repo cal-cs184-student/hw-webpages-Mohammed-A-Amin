@@ -158,7 +158,24 @@
 		</div>
 
 		<h3>Part 4: Edge flip</h3>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		<p>
+			We largely followed the <a href="https://15462.courses.cs.cmu.edu/fall2015content/misc/HalfedgeEdgeOpImplementationGuide.pdf">CMU Halfedge Edge Op Implementation Guide</a> which outlines the approach: draw before/after diagrams, collect all elements, then exhaustively reassign every pointer. We filled in the parts left open in the guide which were the remaining halfedge reassignments (h2–h8), edges, and faces. The trickiest part was keeping track of which vertex maps to which variable, since there are 10 halfedges, 4 vertices, 5 edges, and 2 faces to manage. One common bug we ran into was accidentally swapping the vertex assignments, for example, confusing which vertex <code>h0->vertex()</code> returns vs <code>h1->vertex()</code>, since a halfedge's vertex is its source, not its destination. This led to faces with the wrong winding order, which caused dark/corrupted rendering due to inverted normals. Having the before/after diagrams was super helpful for debugging and coding this out.
+		</p>
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="Screenshot%202026-03-04%20at%2010.07.20%E2%80%AFPM.png" width="400px"/>
+				  <figcaption>Before edge flip</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="Screenshot%202026-03-04%20at%2010.07.44%E2%80%AFPM.png" width="400px"/>
+				  <figcaption>After edge flip</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
 
 		<h3>Part 5: Edge split</h3>
 		<p>
