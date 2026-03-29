@@ -28,7 +28,7 @@
 	<body>
 		<div class="container">
 		<h1>CS184/284A Spring 2025 Homework 3 Write-Up</h1>
-		<div style="text-align: center;">Names: </div>
+		<div style="text-align: center;">Names: Mohammed Amin and Sean Tai</div>
 
 		<br>
 
@@ -48,34 +48,55 @@
 		Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
 
 		<h2>Part 1: Ray Generation and Scene Intersection</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
-		<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
+		<h3>Ray Generation</h3>
+		<p>
+			We generate camera rays by mapping normalized image coordinates \((x, y)\) from \([0,1] \times [0,1]\) to the camera sensor plane at \(z = -1\),
+			interpolating (via lerp) between the bottom-left corner \((-\tan(\text{hFov}/2),\; -\tan(\text{vFov}/2),\; -1)\) and top-right corner
+			\((\tan(\text{hFov}/2),\; \tan(\text{vFov}/2),\; -1)\). The ray direction in camera space is then transformed to world space
+			using the camera-to-world rotation matrix <code>c2w</code>.
+		</p>
+
+		<h3>Triangle Intersection</h3>
+		<p>
+			Following the M&ouml;ller-Trumbore algorithm from lecture and Discussion 7, we solve for both the ray parameter \(t\) and
+			barycentric coordinates \((b_1, b_2)\) simultaneously. We compute edge vectors
+			\(\mathbf{E_1} = \mathbf{p_2} - \mathbf{p_1}\), \(\mathbf{E_2} = \mathbf{p_3} - \mathbf{p_1}\), and
+			\(\mathbf{S} = \mathbf{o} - \mathbf{p_1}\), then use cross products
+			\(\mathbf{S_1} = \text{cross}(\mathbf{d}, \mathbf{E_2})\) and \(\mathbf{S_2} = \text{cross}(\mathbf{S}, \mathbf{E_1})\) to get:
+		</p>
+		\[
+			\begin{bmatrix} t \\ b_1 \\ b_2 \end{bmatrix}
+			= \frac{1}{\mathbf{S_1} \cdot \mathbf{E_1}}
+			\begin{bmatrix} \mathbf{S_2} \cdot \mathbf{E_2} \\ \mathbf{S_1} \cdot \mathbf{S} \\ \mathbf{S_2} \cdot \mathbf{d} \end{bmatrix}
+		\]
+		<p>
+			We check that \(t\) is within \([\text{min\_t},\; \text{max\_t}]\) and that the barycentric coordinates satisfy
+			\(b_1 \geq 0\), \(b_2 \geq 0\), \(b_1 + b_2 \leq 1\). If valid, we interpolate the vertex normals using
+			\(b_0 = 1 - b_1 - b_2\) to get the surface normal at the hit point.
+		</p>
+
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
 			  <tr>
 				<td style="text-align: center;">
-				  <img src="cornell.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				  <img src="CBspheres.png" width="400px"/>
+				  <figcaption>CBspheres.dae</figcaption>
 				</td>
 				<td style="text-align: center;">
-				  <img src="cornell.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				  <img src="banana.png" width="400px"/>
+				  <figcaption>banana.dae</figcaption>
 				</td>
 			  </tr>
 			  <tr>
-				<td style="text-align: center;">
-				  <img src="cornell.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-				<td style="text-align: center;">
-				  <img src="cornell.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				<td style="text-align: center;" colspan="2">
+				  <img src="cow.png" width="400px"/>
+				  <figcaption>cow.dae</figcaption>
 				</td>
 			  </tr>
 			</table>
 		</div>
-		
+
 		<h2>Part 2: Bounding Volume Hierarchy</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
