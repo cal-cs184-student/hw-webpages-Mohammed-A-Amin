@@ -98,7 +98,48 @@
 		</div>
 
 		<h2>Part 2: Bounding Volume Hierarchy</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+		<h3>BVH Construction</h3>
+		<p>
+			We build the BVH recursively. For each node, we compute the bounding box of all primitives.
+			If count &gt;= <code>max_leaf_size</code>, we create a leaf.
+			Otherwise, we pick the axis with the largest extent (the dim of widest side of bbox)
+			and compute the average centroid of all primitives along that axis as the split point.
+			Addressing the heuristic for splits, we simply did it based off whether their centroid falls below or above
+			this average, which intuitively makes the most sense. We account for an edge case: if all primitives land
+			on a single side we just split the list in half instead &mdash; otherwise we'd have infinite recursion.
+		</p>
+
+		<h3>BVH Performance</h3>
+		<p>
+			As noted in the spec, even a simple heuristic reduces ray intersection complexity from \(O(n)\) to \(O(\log n)\).
+			For <code>peter.dae</code>, rendering without BVH took 274.93s with an average of
+			40,018 intersection tests per ray. With BVH, the same render completed in 0.13s
+			with only 2.53 intersection tests per ray &mdash; about a ~2000x speedup.
+			This demonstrates how the BVH allows the traversal to skip entire subtrees of primitives whose bounding boxes
+			the ray misses, dramatically reducing the number of intersection tests needed.
+		</p>
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="peter.png" width="400px"/>
+				  <figcaption>peter.dae</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="maxplanck.png" width="400px"/>
+				  <figcaption>maxplanck.dae</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;" colspan="2">
+				  <img src="CBlucy.png" width="400px"/>
+				  <figcaption>CBlucy.dae</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
 
 		<h2>Part 3: Direct Illumination</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
