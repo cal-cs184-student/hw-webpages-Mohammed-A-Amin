@@ -142,7 +142,76 @@
 		</div>
 
 		<h2>Part 3: Direct Illumination</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		<h3>Uniform Hemisphere Sampling</h3>
+		<p>
+			We estimate direct lighting by shooting <code>num_samples</code> random rays uniformly across the hemisphere above the hit point.
+			For each ray that hits a light source, we accumulate its contribution using the Monte Carlo estimator provided:
+			\( f(\omega_i \to \omega_o) \cdot L_i \cdot \cos(\theta) \;/\; p(\omega) \), where \( p(\omega) = 1/(2\pi) \) for uniform hemisphere sampling.
+		</p>
+
+		<h3>Importance Sampling Lights</h3>
+		<p>
+			Instead of random hemisphere directions, we loop over each light in the scene and sample directions toward the light
+			using <code>sample_L</code>. We then cast a shadow ray to check if anything blocks the path to the light. If unblocked,
+			we accumulate using the same reflection equation but with the pdf provided by <code>sample_L</code>. Point lights only
+			need one sample since all samples would be identical.
+		</p>
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="CBbunny_H_64_32_uniform.png" width="400px"/>
+				  <figcaption>CBbunny - Uniform Hemisphere Sampling</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="bunny_64_32_importance.png" width="400px"/>
+				  <figcaption>Bunny - Importance Sampling</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="CBspheres_H_64_32.png" width="400px"/>
+				  <figcaption>CBspheres - Uniform Hemisphere Sampling</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="CBspheres_64_32.png" width="400px"/>
+				  <figcaption>CBspheres - Importance Sampling</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+
+		<p>Below we compare noise levels in soft shadows when rendering CBbunny.dae with 1 sample per pixel (<code>-s 1</code>) and varying light rays (<code>-l</code>) using light sampling:</p>
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="CBbunny_s1_l1.png" width="400px"/>
+				  <figcaption>1 light ray (-l 1)</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="CBbunny_s1_l4.png" width="400px"/>
+				  <figcaption>4 light rays (-l 4)</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="CBbunny_s1_l16.png" width="400px"/>
+				  <figcaption>16 light rays (-l 16)</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="CBbunny_s1_l64.png" width="400px"/>
+				  <figcaption>64 light rays (-l 64)</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+
+		<p>
+			Comparison between lighting sampling and uniform hemisphere sampling: Importance sampling produces much cleaner results than hemisphere sampling at the same sample count and all other settings held constant. With hemisphere sampling, the whole image (and mainly softer shadows) appear very grainy, and this is because most sampled directions don't hit the light, so only a small fraction of samples contribute to the estimate. Importance sampling looks much less grainy and directs every sample toward a light source, so each sample has the potential to contribute, resulting in less variance. This difference is very visible in lighter regions, where hemisphere sampling is grainy while importance sampling renders smoothly. Additionally, importance sampling can handle point light sources, which hemisphere sampling cannot render at all since the probability of a random ray hitting a single point is zero.
+		</p>
 
 		<h2>Part 4: Global Illumination</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
