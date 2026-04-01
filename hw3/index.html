@@ -214,7 +214,241 @@
 		</p>
 
 		<h2>Part 4: Global Illumination</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		<h3>Walk Through of Indirect Lighting Implementation</h3>
+		<p>
+			For diffuse materials, we implemented <code>DiffuseBSDF::sample_f</code> by sampling one incoming direction
+			<code>w_i</code> from the cosine-weighted hemisphere sampler stored in the BSDF, writing that sampled direction
+			and its probability density into <code>wi</code> and <code>pdf</code>, and returning the Lambertian BRDF value
+			<code>reflectance / PI</code>. This gives us a Monte Carlo sample for the hemisphere integral in the rendering equation.
+		</p>
+		<p>
+			To estimate global illumination, we updated <code>est_radiance_global_illumination</code> so that after intersecting
+			the scene it returns emitted radiance from the current hit point plus the contribution from
+			<code>at_least_one_bounce_radiance</code>. We also initialize each camera ray's depth to
+			<code>max_ray_depth</code> in <code>raytrace_pixel</code> so that recursion stops after the desired number of bounces.
+		</p>
+		<p>
+			The main recursive work happens in <code>at_least_one_bounce_radiance</code>. At each hit point, we first compute
+			the local shading frame using <code>o2w</code> and <code>w2o</code>, and convert the outgoing direction into local
+			coordinates. We then add the one-bounce direct lighting term when accumulating bounces, sample one new incoming
+			direction from the BSDF, transform that sampled direction back to world space, and trace a new ray starting from
+			the hit point with an <code>EPS_F</code> offset to avoid self-intersection.
+		</p>
+		<p>
+			If the sampled ray hits another object, we recursively estimate the incoming radiance from that next surface and
+			weight it by the BRDF, cosine term, and sampling density:
+			<code>f * L_i * cos(theta) / pdf</code>. For Task 3, we added Russian roulette termination with continuation
+			probability 0.7. The first indirect bounce is always allowed when indirect lighting is enabled, and deeper bounces
+			continue probabilistically; when a path continues, we divide by the continuation probability to keep the estimator unbiased.
+		</p>
+
+		<h3>Global Illumination Results (1024 spp)</h3>
+		<p>
+			Below are two scenes rendered with full global illumination, including both direct and indirect lighting, at 1024 samples per pixel.
+			The Cornell box scenes make indirect bounce lighting especially visible because light reflects off the colored walls and softly
+			illuminates the bunny and the diffuse spheres.
+		</p>
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="CBbunny_global.png" width="400px"/>
+				  <figcaption>CBbunny - Global Illumination</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="CBspheres_lambertian_global.png" width="400px"/>
+				  <figcaption>CBspheres Lambertian - Global Illumination</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+
+		<h3>Direct vs. Indirect Illumination (1024 spp)</h3>
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="CBbunny_direct.png" width="400px"/>
+				  <figcaption>CBbunny - Direct Only</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="CBspheres_lambertian_direct.png" width="400px"/>
+				  <figcaption>CBspheres Lambertian - Direct Only</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="CBbunny_indirect.png" width="400px"/>
+				  <figcaption>CBbunny - Indirect Only</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="CBspheres_lambertian_indirect.png" width="400px"/>
+				  <figcaption>CBspheres Lambertian - Indirect Only</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+		<p>
+			In both scenes, the direct-only renders capture the primary illumination from the area light and define the strongest shadows,
+			while the indirect-only renders show softer light transport caused by multiple bounces inside the Cornell box. The indirect component
+			is dimmer overall, but it still fills in shadowed regions and shows subtle color bleeding from the red and blue walls onto the
+			bunny and spheres.
+		</p>
+
+		<h3>CBbunny Bounce Comparison (1024 spp)</h3>
+		<p>
+			Below we compare unaccumulated and accumulated bounces for <code>CBbunny.dae</code> as <code>max_ray_depth</code> increases from
+			0 through 5. The unaccumulated row isolates the exact <code>m</code>th bounce contribution, while the accumulated row shows the
+			sum of all bounce contributions up to depth <code>m</code>.
+		</p>
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+				<tr>
+					<th style="padding: 8px;">isAccumBounces</th>
+					<th style="padding: 8px;">m=0</th>
+					<th style="padding: 8px;">m=1</th>
+					<th style="padding: 8px;">m=2</th>
+					<th style="padding: 8px;">m=3</th>
+					<th style="padding: 8px;">m=4</th>
+					<th style="padding: 8px;">m=5</th>
+				</tr>
+				<tr>
+					<td style="padding: 8px;"></td>
+					<td style="padding: 8px;">\(L_e\)</td>
+					<td style="padding: 8px;">\(K(L_e)\)</td>
+					<td style="padding: 8px;">\((K \circ K)(L_e)\)</td>
+					<td style="padding: 8px;">\((K \circ K \circ K)(L_e)\)</td>
+					<td style="padding: 8px;">\((K \circ K \circ K \circ K)(L_e)\)</td>
+					<td style="padding: 8px;">\((K \circ K \circ K \circ K \circ K)(L_e)\)</td>
+				</tr>
+				<tr>
+					<td style="padding: 8px; font-weight: 600;">false</td>
+					<td style="padding: 8px;"><img src="CBbunny_unaccum_m0.png" width="180px"/></td>
+					<td style="padding: 8px;"><img src="CBbunny_unaccum_m1.png" width="180px"/></td>
+					<td style="padding: 8px;"><img src="CBbunny_unaccum_m2.png" width="180px"/></td>
+					<td style="padding: 8px;"><img src="CBbunny_unaccum_m3.png" width="180px"/></td>
+					<td style="padding: 8px;"><img src="CBbunny_unaccum_m4.png" width="180px"/></td>
+					<td style="padding: 8px;"><img src="CBbunny_unaccum_m5.png" width="180px"/></td>
+				</tr>
+				<tr>
+					<td style="padding: 8px;"></td>
+					<td style="padding: 8px;">\(\sum_{i=0}^{0} K^i(L_e)\)</td>
+					<td style="padding: 8px;">\(\sum_{i=0}^{1} K^i(L_e)\)</td>
+					<td style="padding: 8px;">\(\sum_{i=0}^{2} K^i(L_e)\)</td>
+					<td style="padding: 8px;">\(\sum_{i=0}^{3} K^i(L_e)\)</td>
+					<td style="padding: 8px;">\(\sum_{i=0}^{4} K^i(L_e)\)</td>
+					<td style="padding: 8px;">\(\sum_{i=0}^{5} K^i(L_e)\)</td>
+				</tr>
+				<tr>
+					<td style="padding: 8px; font-weight: 600;">true</td>
+					<td style="padding: 8px;"><img src="CBbunny_accum_m0.png" width="180px"/></td>
+					<td style="padding: 8px;"><img src="CBbunny_accum_m1.png" width="180px"/></td>
+					<td style="padding: 8px;"><img src="CBbunny_accum_m2.png" width="180px"/></td>
+					<td style="padding: 8px;"><img src="CBbunny_accum_m3.png" width="180px"/></td>
+					<td style="padding: 8px;"><img src="CBbunny_accum_m4.png" width="180px"/></td>
+					<td style="padding: 8px;"><img src="CBbunny_accum_m5.png" width="180px"/></td>
+				</tr>
+			</table>
+		</div>
+
+		<p>
+			For the unaccumulated row at <code>m=0</code>, we only see emitted radiance from
+			the light source, so the rest of the Cornell box is black. At <code>m=1</code>, we get the usual direct-lighting image with the
+			bunny and its shadow visible. At <code>m=2</code>, the image shows the second bounce only: this is where indirect illumination
+			becomes clearly visible, with light reflected off the white walls and floor softly illuminating the bunny and reducing the harsh
+			contrast in regions that were previously shadowed. At <code>m=3</code> and beyond, each higher-order bounce contributes less
+			energy, so these images become dimmer and more subtle than the second bounce.
+		</p>
+
+		<p>
+			Compared to rasterization, these higher bounces are what make the rendered result look more realistic. Rasterization with direct
+			lighting alone captures primary illumination and sharp shadows, but it misses the soft secondary light transport that brightens
+			concavities and corners. In the accumulated row, the biggest visual jump happens between <code>m=1</code> and <code>m=2</code>,
+			because that is when indirect lighting first appears. The later accumulated images from <code>m=3</code> onward change less
+			dramatically, which is expected because each additional bounce contributes less energy than the previous one.
+		</p>
+
+		<h3>Russian Roulette on CBbunny (1024 spp)</h3>
+		<p>
+			For this section, we re-enabled Russian roulette in <code>at_least_one_bounce_radiance(...)</code> so that after the first
+			indirect bounce, longer paths are continued probabilistically instead of deterministically. This gives an unbiased estimate of
+			global illumination while avoiding the cost of tracing every path all the way to a very large fixed depth.
+		</p>
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+				<tr>
+					<th style="padding: 8px;">m=0</th>
+					<th style="padding: 8px;">m=1</th>
+					<th style="padding: 8px;">m=2</th>
+					<th style="padding: 8px;">m=3</th>
+					<th style="padding: 8px;">m=4</th>
+					<th style="padding: 8px;">m=100</th>
+				</tr>
+				<tr>
+					<td style="padding: 8px;"><img src="CBbunny_rr_m0.png" width="180px"/></td>
+					<td style="padding: 8px;"><img src="CBbunny_rr_m1.png" width="180px"/></td>
+					<td style="padding: 8px;"><img src="CBbunny_rr_m2.png" width="180px"/></td>
+					<td style="padding: 8px;"><img src="CBbunny_rr_m3.png" width="180px"/></td>
+					<td style="padding: 8px;"><img src="CBbunny_rr_m4.png" width="180px"/></td>
+					<td style="padding: 8px;"><img src="CBbunny_rr_m100.png" width="180px"/></td>
+				</tr>
+			</table>
+		</div>
+
+		<p>
+			Because Russian roulette only affects the treatment of longer paths, the low-depth images remain close to the fixed-depth
+			results, while the <code>m=100</code> render looks very similar to the converged accumulated-bounce image. The largest visual
+			change still occurs when indirect lighting first appears, and beyond that the result stabilizes quickly as the maximum depth
+			increases. This shows that Russian roulette lets us account for long light paths without having to trace every path
+			deterministically to a very large depth.
+		</p>
+
+		<h3>Sample-Per-Pixel Comparison on CBbunny (4 light rays)</h3>
+		<p>
+			To study convergence with respect to camera sampling, we rendered <code>CBbunny.dae</code> using 4 light rays and varied the
+			samples per pixel across <code>1, 2, 4, 8, 16, 64, 1024</code>. As the sample count increases, the Monte Carlo noise should
+			decrease, especially in the soft shadow under the bunny, on the back wall, and across the smoother floor regions.
+		</p>
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+				<tr>
+					<th style="padding: 8px;">1 spp</th>
+					<th style="padding: 8px;">2 spp</th>
+					<th style="padding: 8px;">4 spp</th>
+					<th style="padding: 8px;">8 spp</th>
+				</tr>
+				<tr>
+					<td style="padding: 8px;"><img src="CBbunny_spp_1.png" width="220px"/></td>
+					<td style="padding: 8px;"><img src="CBbunny_spp_2.png" width="220px"/></td>
+					<td style="padding: 8px;"><img src="CBbunny_spp_4.png" width="220px"/></td>
+					<td style="padding: 8px;"><img src="CBbunny_spp_8.png" width="220px"/></td>
+				</tr>
+				<tr>
+					<th style="padding: 8px;">16 spp</th>
+					<th style="padding: 8px;">64 spp</th>
+					<th style="padding: 8px;">1024 spp</th>
+					<th style="padding: 8px;"></th>
+				</tr>
+				<tr>
+					<td style="padding: 8px;"><img src="CBbunny_spp_16.png" width="220px"/></td>
+					<td style="padding: 8px;"><img src="CBbunny_spp_64.png" width="220px"/></td>
+					<td style="padding: 8px;"><img src="CBbunny_spp_1024.png" width="220px"/></td>
+					<td style="padding: 8px;"></td>
+				</tr>
+			</table>
+		</div>
+
+		<p>
+			At very low sample counts, the image is visibly grainy because each pixel is estimated from only a few Monte Carlo samples.
+			As the sample rate increases, the estimate becomes more stable and the variance drops. By <code>64</code> samples per pixel,
+			the overall structure of the image is already fairly clean, while <code>1024</code> samples per pixel produces a much smoother
+			result with noticeably reduced noise in shadowed and indirectly lit regions.
+		</p>
 
 		<h2>Part 5: Adaptive Sampling</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
