@@ -32,8 +32,8 @@
 
 		<br>
 
-		Link to webpage: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
-		Link to GitHub repository: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
+		Link to webpage:  <a href="https://cal-cs184-student.github.io/hw-webpages-Mohammed-A-Amin/hw3/index.html">cal-cs184-student.github.io/hw-webpages-Mohammed-A-Amin/hw3/index.html</a>
+		Link to GitHub repository:  <a href="https://github.com/cal-cs184-student/hw3-pathtracer-seanmoo">https://github.com/cal-cs184-student/hw3-pathtracer-seanmoo</a>
 		
 		<figure>
 			<img src="cornell.png" alt="Cornell Boxes with Bunnies" style="width:70%"/>
@@ -45,7 +45,26 @@
 		-->
 
 		<h2>Overview</h2>
-		Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
+		<p>
+			In this homework, we built a path tracer step by step and saw how each component fits into a full rendering pipeline.
+			We started by generating camera rays and intersecting them with scene geometry, then added BVH acceleration so the
+			renderer could handle more complex scenes efficiently. From there, we implemented direct lighting with both hemisphere
+			sampling and importance sampling, extended the renderer to support indirect lighting through recursive global illumination,
+			and then improved that estimator with Russian roulette and adaptive sampling. By the end, we had a renderer capable of
+			producing soft shadows, indirect bounce lighting, color bleeding, and sampling-rate visualizations that show where the
+			computation is actually being spent.
+		</p>
+		<p>
+			What stood out most to us while working through the assignment was how much both efficiency and sampling strategy matter
+			in practice. We could see very clearly that even a correct rendering equation estimator is not very useful if the
+			underlying intersection pipeline is too slow, and likewise that a fast renderer still produces poor results if the
+			sampling strategy has high variance. Implementing BVH made complex scenes practical, while importance sampling, recursive
+			bounces, and Russian roulette made the Monte Carlo estimator much more effective. Adaptive sampling tied everything
+			together by showing us that not all pixels need the same amount of work, and that convergence can vary a lot depending
+			on geometry, visibility, and indirect illumination. Overall, this homework made the rendering process feel much more
+			concrete for us, because we were not just applying formulas from lecture but actually seeing how those ideas affect image
+			quality, noise, and runtime.
+		</p>
 
 		<h2>Part 1: Ray Generation and Scene Intersection</h2>
 
@@ -451,21 +470,60 @@
 		</p>
 
 		<h2>Part 5: Adaptive Sampling</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		<p>
+			Adaptive sampling reduces wasted work by stopping early on pixels that have already converged and spending more samples on
+			pixels that still have high variance. Instead of forcing every pixel to use the same number of camera rays, we monitor the
+			estimated illuminance for each pixel and terminate sampling once its confidence interval is small enough relative to the mean.
+		</p>
+		<p>
+			We implemented this in <code>PathTracer::raytrace_pixel()</code>. As samples are traced for a pixel, we accumulate the total
+			radiance as usual, but we also keep running statistics over the scalar illuminance values using
+			\(s_1 = \sum x_k\) and \(s_2 = \sum x_k^2\). Every <code>samplesPerBatch</code> samples, we compute the sample
+			mean \(\mu = s_1 / n\), the sample variance
+			\(\sigma^2 = \frac{1}{n-1}\left(s_2 - \frac{s_1^2}{n}\right)\), and the 95% confidence interval half-width
+			\(I = 1.96 \cdot \sigma / \sqrt{n}\). If \(I \le \text{maxTolerance} \cdot \mu\), we stop tracing additional rays
+			for that pixel. Otherwise, we continue until either the pixel converges or we reach <code>ns_aa</code>, which acts as the
+			maximum sample budget. We also store the actual number of samples used in <code>sampleCountBuffer</code> so the sampling-rate
+			visualization reflects the true work spent on each pixel.
+		</p>
+		<p>
+			For the results below, we rendered two scenes with adaptive sampling enabled, using at least 2048 maximum samples per pixel,
+			1 light sample, and a max ray depth of at least 5. The rendered images remain visually clean, while the sample-rate heatmaps
+			show that the path tracer spends more samples near geometric edges, contact shadows, and regions with stronger indirect-lighting
+			variance. Large smooth wall and floor regions converge earlier and therefore use fewer samples.
+		</p>
 
-		<h2>(Optional) Part 6: Extra Credit Opportunities</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-		
-		<h2>Additional Notes (please remove)</h2>
-		<ul>
-			<li>You can also add code if you'd like as so: <code>code code code</code></li>
-			<li>If you'd like to add math equations, 
-				<ul>
-					<li>You can write inline equations like so: \( a^2 + b^2 = c^2 \)</li>
-					<li>You can write display equations like so: \[ a^2 + b^2 = c^2 \]</li>
-				</ul>
-			</li>
-		</ul>
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+				<tr>
+					<th style="padding: 8px;">CBbunny Result</th>
+					<th style="padding: 8px;">CBbunny Sample Rate</th>
+				</tr>
+				<tr>
+					<td style="padding: 8px;"><img src="CBbunny_adaptive.png" width="400px"/></td>
+					<td style="padding: 8px;"><img src="CBbunny_adaptive_rate.png" width="400px"/></td>
+				</tr>
+				<tr>
+					<th style="padding: 8px;">CBspheres Lambertian Result</th>
+					<th style="padding: 8px;">CBspheres Lambertian Sample Rate</th>
+				</tr>
+				<tr>
+					<td style="padding: 8px;"><img src="CBspheres_lambertian_adaptive.png" width="400px"/></td>
+					<td style="padding: 8px;"><img src="CBspheres_lambertian_adaptive_rate.png" width="400px"/></td>
+				</tr>
+			</table>
+		</div>
+
+		<p>
+			In the sample-rate images, warmer regions correspond to pixels that required more samples before satisfying the convergence test,
+			while cooler regions converged quickly. In <code>CBbunny</code>, the bunny silhouette, shadow boundaries, and nearby indirect
+			lighting transitions require noticeably more work than the flatter background walls. In
+			<code>CBspheres_lambertian</code>, the sphere contours, occlusion regions near the floor, and soft shadow gradients also demand
+			higher sample counts. 
+		</p>
+
+
+	
 		</div>
 	</body>
 </html>
