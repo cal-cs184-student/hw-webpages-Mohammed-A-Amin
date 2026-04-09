@@ -175,7 +175,35 @@
 		</figure>
 
 		<h2>Part 3: Handling collisions with other objects</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+		<p>
+			Sphere collisions: To handle collisions with the sphere we first check if a point mass is inside the sphere by comparing its distance from the origin to the radius. If the point mass is inside the sphere, we compute the tangent point by starting from the origin, going through the point mass's position, then out to the sphere surface. We then make a correction vector from the point mass's last position to this tangent point and apply it scaled by (1 - f) to get the new position.
+		</p>
+		<p>
+			For plane collisions, we take the dot product of each point mass's position and last position with the plane normal to get their signed distances from the plane. If the signs are the same, the point mass is still on the same side of the plane, otherwise the point mass crossed the plane during this timestep. We find the tangent point by projecting the current position onto the plane along the normal, then bump it slightly back using the surface offset given. We compute the correction from last position to this adjusted tangent point and scale by (1 - friction).
+		</p>
+		<p>
+			In both cases, the collision loop in simulate iterates over every point mass and every collision object each timestep. The general approach follows the instructions given in the assignment.
+		</p>
+
+		<div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; margin-top: 24px;">
+			<figure style="margin: 0; max-width: 320px;">
+				<img src="sphereks500.png" alt="Cloth on sphere with ks=500" style="width: 100%;"/>
+				<figcaption><code>ks</code> = 500</figcaption>
+			</figure>
+			<figure style="margin: 0; max-width: 320px;">
+				<img src="sphereks5000.png" alt="Cloth on sphere with ks=5000" style="width: 100%;"/>
+				<figcaption><code>ks</code> = 5000 (default)</figcaption>
+			</figure>
+			<figure style="margin: 0; max-width: 320px;">
+				<img src="sphereks50000.png" alt="Cloth on sphere with ks=50000" style="width: 100%;"/>
+				<figcaption><code>ks</code> = 50000</figcaption>
+			</figure>
+		</div>
+
+		<p>
+			With <code>ks</code> = 500, the cloth drapes very loosely around the sphere, and hangs pretty far down with a lot of folds (since the springs are too weak). At the default <code>ks</code> = 5000, the cloth sits more better on the sphere with fewer folds and and feels more natural with the droopiness. With <code>ks</code> = 50000, the cloth is much stiffer and sits really stiffly on the sphere. It is more like a stiff paper than matching the curvature of the sphere.
+		</p>
 
 		<h2>Part 4: Handling self-collisions</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
