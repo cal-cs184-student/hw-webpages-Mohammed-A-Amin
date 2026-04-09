@@ -28,15 +28,15 @@
 	<body>
 		<div class="container">
 		<h1>CS184/284A Spring 2025 Homework 4 Write-Up</h1>
-		<div style="text-align: center;">Names: </div>
+		<div style="text-align: center;">Mohammed Amin, Sean Tai</div>
 
 		<br>
 
-		Link to webpage: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
+		Link to webpage:<a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
 
 		<br>
 
-		Link to GitHub repository: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
+		Link to GitHub repository: <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
 
 		<figure>
 			<img src="clothsim.png" alt="Cloth draped over sphere" style="width:70%"/>
@@ -51,36 +51,128 @@
 		Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
 
 		<h2>Part 1: Masses and springs</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		<p>
+			We built the cloth as a grid of point masses stored in row-major order and connected them with structural, shearing, and bending springs.
+			For each grid location, we created a <code>PointMass</code>, marked it as pinned if its coordinate appeared in the scene's pinned list, and then added springs only after all masses had been created so the spring endpoints could safely store pointers into the mass array.
+			Structural springs connect each point mass to the mass above and to the left, shearing springs connect diagonal upper-left and upper-right neighbors, and bending springs connect masses that are two away horizontally or vertically.
+		</p>
 
-		<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
-		<div style="display: flex; flex-direction: column; align-items: center;">
-			<table style="width: 100%; text-align: center; border-collapse: collapse;">
-			  <tr>
-				<td style="text-align: center;">
-				  <img src="clothsim.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-				<td style="text-align: center;">
-				  <img src="clothsim.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-			  </tr>
-			  <tr>
-				<td style="text-align: center;">
-				  <img src="clothsim.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-				<td style="text-align: center;">
-				  <img src="clothsim.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-			  </tr>
-			</table>
+		<p>
+			The screenshots below show the wireframe for <code>scene/pinned2.json</code> under different constraint settings.
+			Without shearing constraints, the cloth only shows horizontal and vertical connections.
+			With only shearing constraints enabled, the wireframe becomes a diagonal lattice.
+			With all constraints enabled, the cloth contains the full combination of structural, shearing, and bending springs, producing the densest and most stable support structure.
+		</p>
+
+		<div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; margin-top: 24px;">
+			<figure style="margin: 0; max-width: 360px;">
+				<img src="noshearing.png" alt="Pinned2 cloth without shearing constraints" style="width: 100%;"/>
+				<figcaption>Without shearing constraints.</figcaption>
+			</figure>
+			<figure style="margin: 0; max-width: 360px;">
+				<img src="onlyshearing.png" alt="Pinned2 cloth with only shearing constraints" style="width: 100%;"/>
+				<figcaption>Only shearing constraints.</figcaption>
+			</figure>
+			<figure style="margin: 0; max-width: 360px;">
+				<img src="allenabled.png" alt="Pinned2 cloth with all constraints enabled" style="width: 100%;"/>
+				<figcaption>All constraints enabled.</figcaption>
+			</figure>
 		</div>
 
 		<h2>Part 2: Simulation via numerical integration</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+			<p>
+				In this part, we implemented force accumulation, Verlet integration, and the Provot-style spring length constraint.
+				That gave the cloth a stable time-step update: external forces and spring forces are accumulated first, point masses are advanced with Verlet, and then overly stretched springs are corrected so the cloth does not explode numerically.
+			</p>
+
+			<h3>Default parameters</h3>
+			<p>
+				These are the baseline settings we used for comparison unless otherwise noted:
+			</p>
+			<ul>
+				<li><code>ks</code>: default simulator value</li>
+				<li>Density: default simulator value</li>
+				<li>Damping: default simulator value</li>
+			</ul>
+		
+			<figure>
+				<img src="defaultparams.png" alt="Default parameter baseline screenshot" style="width:70%"/>
+			</figure>
+
+			<h3>Effect of spring constant <code>ks</code></h3>
+			<p>
+				With a very low <code>ks</code>, the cloth behaves like a loose fabric or a sheet of cloth with weak structural support.
+			It stretches a lot under gravity, sags more dramatically, and takes longer to settle into a resting shape.
+			With a high <code>ks</code>, the cloth becomes much stiffer and resists deformation, so it keeps its overall shape better but can also look more tense and can oscillate more aggressively if the damping is not high enough.
+		</p>
+
+		<figure>
+			<img src="ks5.png" alt="Insert ks comparison screenshot here" style="width:70%"/>
+			<figcaption>ks = 5</figcaption>
+		</figure>
+
+		<h3>Effect of density</h3>
+		<p>
+			Changing density changes the mass of each point mass, which changes how strongly gravity accelerates the cloth relative to the spring forces.
+			A lower density cloth feels lighter and settles with less sag, while a higher density cloth droops more, moves with more inertia, and tends to swing through larger motions before reaching rest.
+		</p>
+		<p>
+			These screenshots compare the start and end of the simulation for two density settings.
+			The low-density cloth falls with less inertia and settles with a lighter drape.
+			The high-density cloth sags more aggressively and keeps more momentum before reaching its resting shape.
+		</p>
+		<div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; margin-top: 24px;">
+			<figure style="margin: 0; max-width: 320px;">
+				<img src="density10ks5000beg.png" alt="Low density, beginning of simulation" style="width: 100%;"/>
+				<figcaption>Density 10, beginning.</figcaption>
+			</figure>
+			<figure style="margin: 0; max-width: 320px;">
+				<img src="density10ks5000end.png" alt="Low density, end of simulation" style="width: 100%;"/>
+				<figcaption>Density 10, end.</figcaption>
+			</figure>
+			<figure style="margin: 0; max-width: 320px;">
+				<img src="density4000ks5000beg.png" alt="High density, beginning of simulation" style="width: 100%;"/>
+				<figcaption>Density 4000, beginning.</figcaption>
+			</figure>
+			<figure style="margin: 0; max-width: 320px;">
+				<img src="density4000ks5000end.png" alt="High density, end of simulation" style="width: 100%;"/>
+				<figcaption>Density 4000, end.</figcaption>
+			</figure>
+		</div>
+
+		<h3>Effect of damping</h3>
+		<p>
+			Damping controls how quickly motion loses energy from one time step to the next.
+			With low damping, the cloth keeps bouncing and swaying for a long time before it settles.
+			With high damping, the motion dies out faster and the cloth reaches rest much sooner, but if it is too high the motion can look overly suppressed and less natural.
+		</p>
+		<p>
+			These screenshots compare two damping settings. The cloth with damping <code>0.11</code> descended much more quickly because it lost kinetic energy faster each step, so the motion was damped out sooner.
+			The cloth with damping <code>0.77</code> retained more of its motion for longer, so it fell and settled more slowly with more visible lingering movement.
+		</p>
+		<div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; margin-top: 24px;">
+			<figure style="margin: 0; max-width: 360px;">
+				<img src="011damping.png" alt="Damping 0.11 screenshot" style="width: 100%;"/>
+				<figcaption>Damping 0.11.</figcaption>
+			</figure>
+			<figure style="margin: 0; max-width: 360px;">
+				<img src="077damping.png" alt="Damping 0.77 screenshot" style="width: 100%;"/>
+				<figcaption>Damping 0.77.</figcaption>
+			</figure>
+		</div>
+
+		<h3>Final resting state</h3>
+		<p>
+			The screenshot below should show the shaded cloth from <code>scene/pinned4.json</code> after it has fully settled.
+			We used non-default simulation parameters for this result, listed below the image.
+		</p>
+		<figure>
+			<img src="finalrest.png" alt="Final resting state of shaded pinned4 cloth" style="width:70%"/>
+			<figcaption>
+				Final shaded resting state for <code>scene/pinned4.json</code>.
+				Non-default parameters used: mode = wireframe; normal = 2; height = 0.1; spring types shown = structural, shearing, bending; density = 50 g/cm^2; <code>ks</code> = 3000 N/m; frames/s = 90; steps/frame = 30; damping = 0.770115%; gravity = (0, -9.8, 0) m/s^2.
+			</figcaption>
+		</figure>
 
 		<h2>Part 3: Handling collisions with other objects</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
