@@ -206,7 +206,47 @@
 		</p>
 
 		<h2>Part 4: Handling self-collisions</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+		<p>
+			For self-collisions, we use spatial hashing to avoid the expensive \(O(n^2)\) pairwise check. Each timestep, we partition 3D space into boxes and hash every point mass into one based on its position. To hash, we truncate coordinates to the same box point for all other points in that box (the corner here) using modulo and combine them with random large numbers to get something unique.
+		</p>
+		<p>
+			Then for each point mass, if there are other point masses in the same box, and is less than 2 * thickness, we compute a correction vector pointing away from it. We skip the point mass itself so it doesn't collide with itself. After looking at all candidates, we avg the correction vectors and scale down by <code>simulation_steps</code> (to smooth), then apply it to the pm's current position.
+		</p>
+
+		<div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; margin-top: 24px;">
+			<figure style="margin: 0; max-width: 320px;">
+				<img src="initialFallCloth.png" alt="Initial self-collision" style="width: 100%;"/>
+				<figcaption>Initial collision.</figcaption>
+			</figure>
+			<figure style="margin: 0; max-width: 320px;">
+				<img src="midFallCloth.png" alt="Mid fall, shortly after collision" style="width: 100%;"/>
+				<figcaption>A second after collision.</figcaption>
+			</figure>
+			<figure style="margin: 0; max-width: 320px;">
+				<img src="endFallCloth.png" alt="End fall, more restful state" style="width: 100%;"/>
+				<figcaption>A few seconds after, more restful state.</figcaption>
+			</figure>
+		</div>
+
+		<div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; margin-top: 24px;">
+			<figure style="margin: 0; max-width: 320px;">
+				<img src="doubleDensityCloth.png" alt="Double density cloth (30 g/cm^2)" style="width: 100%;"/>
+				<figcaption>Double density (30 g/cm&sup2;)</figcaption>
+			</figure>
+			<figure style="margin: 0; max-width: 320px;">
+				<img src="lowerKsCloth.png" alt="10x lower ks cloth (500 N/m)" style="width: 100%;"/>
+				<figcaption>10x lower <code>ks</code> (500 N/m)</figcaption>
+			</figure>
+			<figure style="margin: 0; max-width: 320px;">
+				<img src="midFallCloth.png" alt="Baseline cloth (15 g/cm^2, 5000 N/m)" style="width: 100%;"/>
+				<figcaption>Baseline (15 g/cm&sup2;, 5000 N/m)</figcaption>
+			</figure>
+		</div>
+
+		<p>
+			All images are about a second after initial collision. The higher density cloth (30 g/cm&sup2;) comes to a restful state much more quickly due to being denser, gravity pulls it down harder so it settles faster. The lower <code>ks</code> cloth (500 N/m) has much more folds than the baseline because the weaker springs makes the cloth fold over itself on its own weight. The baseline (15 g/cm&sup2;, 5000 N/m) sits between the two, with a moderate number of folds and a moderate settling time.
+		</p>
 
 		<h2>Part 5: Shaders</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
