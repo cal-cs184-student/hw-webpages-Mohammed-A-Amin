@@ -250,7 +250,35 @@
 		</p>
 
 		<h2>Part 5: Shaders</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+		<p>
+			A shader program is a program part of the rendering pipeline and runs on the GPU in parallel instead of sequentially on the CPU (doing one pixel color at a time). The parallelism allows the shader program to process hundreds of vertices at the same time.
+		</p>
+		<p>
+			As for vertex and fragment shaders, vertex shaders runs first, once per vertex, and brings each from model space to screen space, passing along data like its normal and the world position. Then, after rasterization, the fragment shader runs once per fragment and takes in interpolated values to calculate a final color that is then outputted. They work together to make lighting/shading/material effects, vertex shader moves first and sets up the geometrics stuff then rasterizes, and then the fragment shader uses that data to do per-pixel lighting.
+		</p>
+		<p>
+			Blinn-Phong simulates how light bounces off a surface by adding three pieces together. The ambient term is just a constant amount of light everywhere, so shadows don't look pitch black. The diffuse term (using \(n \cdot l\)) brightens surfaces that face the light, which makes a matte look. The specular term (using \(n \cdot h\), where \(h\) is the half-vector) creates the shiny highlights on glossy things that reflects back to the camera. Adding all three together gives you a surface that looks properly lit, with soft shadows, a clear sense of shape, and nice shiny spots where light reflects toward the camera.
+		</p>
+
+		<div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; margin-top: 24px;">
+			<figure style="margin: 0; max-width: 320px;">
+				<img src="ambientOnly.png" alt="Ambient only" style="width: 100%;"/>
+				<figcaption>Ambient component only.</figcaption>
+			</figure>
+			<figure style="margin: 0; max-width: 320px;">
+				<img src="diffuseOnly.png" alt="Diffuse only" style="width: 100%;"/>
+				<figcaption>Diffuse component only.</figcaption>
+			</figure>
+			<figure style="margin: 0; max-width: 320px;">
+				<img src="specularOnly.png" alt="Specular only" style="width: 100%;"/>
+				<figcaption>Specular component only.</figcaption>
+			</figure>
+			<figure style="margin: 0; max-width: 320px;">
+				<img src="fullBlinnPhong.png" alt="Full Blinn-Phong" style="width: 100%;"/>
+				<figcaption>Full Blinn-Phong model.</figcaption>
+			</figure>
+		</div>
 
 		<h2>(Optional) Part 6: Extra Credit - Additional cloth simulation features!</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
